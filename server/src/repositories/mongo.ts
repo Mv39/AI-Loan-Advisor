@@ -1,5 +1,6 @@
 import { Collection, Db, MongoClient } from 'mongodb';
 import crypto from 'node:crypto';
+import os from 'node:os';
 import usersJson from '../data/users.json';
 import type { BorrowerProfile } from '../domain/types';
 import type { ChatMessage, ChatRepository, ChatSession, ProfileRepository } from './types';
@@ -138,7 +139,15 @@ export interface MongoStores {
 }
 
 export async function connectMongo(uri: string, dbName: string, ttlMs: number): Promise<MongoStores> {
-  const client = new MongoClient(uri, { serverSelectionTimeoutMS: 5000, maxPoolSize: 20, appName: 'loan-advisor' });
+  const client = new MongoClient(uri, {
+    serverSelectionTimeoutMS: 5000,
+    maxPoolSize: 20,
+    appName: 'loan-advisor',
+    // Hand the driver Node's `os` module explicitly. By default it loads it via a dynamic import(),
+    // which fails inside sandboxed CommonJS runtimes such as Jest; the driver then silently sends an
+    // empty handshake and the server rejects it ("Missing required sub-document 'driver'").
+    runtimeAdapters: { os },
+  });
   await client.connect();
   const db = client.db(dbName);
   await ensureIndexes(db, ttlMs);
