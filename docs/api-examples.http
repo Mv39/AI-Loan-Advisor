@@ -1,0 +1,85 @@
+### LoanSense API examples (VS Code REST Client / JetBrains HTTP client)
+@base = http://localhost:3000/api
+
+### Health (shows whether AI mode is enabled)
+GET {{base}}/health
+
+### Demo login -> copy "token" into @token below
+POST {{base}}/auth/demo-login
+Content-Type: application/json
+
+{ "username": "priya" }
+
+###
+@token = paste-token-here
+
+### EMI calculator (public) - expect EMI 16607.15
+POST {{base}}/emi/calculate
+Content-Type: application/json
+
+{ "principal": 500000, "annualRatePct": 12, "tenureMonths": 36, "processingFeePct": 2 }
+
+### My profile
+GET {{base}}/me/profile
+Authorization: Bearer {{token}}
+
+### Update my profile
+PUT {{base}}/me/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "requestedAmount": 300000, "purpose": "wedding", "monthlyIncome": 80000, "existingEmi": 5000,
+  "preferredTenureMonths": 24, "employmentType": "salaried", "riskProfile": "medium",
+  "hasExistingLoanWithUs": false, "hasCollateral": false
+}
+
+### Recommendations (optional what-if overrides are NOT persisted)
+POST {{base}}/me/recommendations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "preferredTenureMonths": 48 }
+
+### Compare products
+GET {{base}}/me/compare?ids=PL-001,TOP-001,SEC-001
+Authorization: Bearer {{token}}
+
+### Create chat session -> copy "id" into @session
+POST {{base}}/me/chat/sessions
+Authorization: Bearer {{token}}
+
+###
+@session = paste-session-id
+
+### Ask the advisor
+POST {{base}}/me/chat/sessions/{{session}}/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "message": "I need 3 lakh for my wedding over 2 years. Which option is cheapest?", "language": "en" }
+
+### Multi-turn comparison
+POST {{base}}/me/chat/sessions/{{session}}/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "message": "Compare personal loan and top-up", "language": "en" }
+
+### Guardrail: approval guarantee + PII (PAN gets redacted)
+POST {{base}}/me/chat/sessions/{{session}}/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "message": "Can you guarantee approval? My PAN is ABCDE1234F", "language": "en" }
+
+### Hindi
+POST {{base}}/me/chat/sessions/{{session}}/messages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "message": "मेरे लिए कौन सा लोन सही है?", "language": "hi" }
+
+### Download summary (HTML or md)
+GET {{base}}/me/summary?format=md
+Authorization: Bearer {{token}}

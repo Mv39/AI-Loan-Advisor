@@ -1,0 +1,54 @@
+[
+  {
+    "id": "usr_7f3a9c",
+    "username": "priya",
+    "displayName": "Priya (Salaried, low risk)",
+    "persona": "Salaried IT professional with an existing loan and a good repayment record.",
+    "profile": {
+      "requestedAmount": 500000,
+      "purpose": "home_renovation",
+      "monthlyIncome": 95000,
+      "existingEmi": 12000,
+      "preferredTenureMonths": 36,
+      "employmentType": "salaried",
+      "riskProfile": "low",
+      "hasExistingLoanWithUs": true,
+      "hasCollateral": false
+    }
+  },
+  {
+    "id": "usr_2b81e4",
+    "username": "rahul",
+    "displayName": "Rahul (Business owner, medium risk)",
+    "persona": "Runs a 4-year-old retail business and wants to expand inventory.",
+    "profile": {
+      "requestedAmount": 1500000,
+      "purpose": "business_expansion",
+      "monthlyIncome": 180000,
+      "existingEmi": 25000,
+      "preferredTenureMonths": 48,
+      "employmentType": "business_owner",
+      "riskProfile": "medium",
+      "hasExistingLoanWithUs": false,
+      "hasCollateral": true,
+      "businessVintageYears": 4
+    }
+  },
+  {
+    "id": "usr_c94d10",
+    "username": "ananya",
+    "displayName": "Ananya (Gig worker, high risk)",
+    "persona": "Freelance delivery partner with variable income needing a phone for work.",
+    "profile": {
+      "requestedAmount": 40000,
+      "purpose": "consumer_purchase",
+      "monthlyIncome": 28000,
+      "existingEmi": 6000,
+      "preferredTenureMonths": 12,
+      "employmentType": "gig_worker",
+      "riskProfile": "high",
+      "hasExistingLoanWithUs": false,
+      "hasCollateral": false
+    }
+  }
+]

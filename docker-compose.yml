@@ -1,0 +1,36 @@
+# Full stack: API + Angular UI (single container) + MongoDB.
+#   cp server/.env.example .env   # set LLM_API_TOKEN and JWT_SECRET
+#   docker compose up --build     # http://localhost:3000
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://llm-wrapper-741152993481.asia-south1.run.app}
+      LLM_API_TOKEN: ${LLM_API_TOKEN:?Set LLM_API_TOKEN in .env}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      CORS_ORIGINS: http://localhost:3000
+      MONGO_URI: mongodb://mongo:27017
+      MONGO_DB: loan_advisor
+    depends_on:
+      mongo:
+        condition: service_healthy
+    read_only: true
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ping:1})"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    # Not published to the host: only reachable from the app container.
+
+volumes:
+  mongo-data:

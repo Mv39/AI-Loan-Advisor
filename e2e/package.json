@@ -1,0 +1,14 @@
+{
+  "name": "loan-advisor-e2e",
+  "version": "1.0.0",
+  "description": "Playwright end-to-end tests",
+  "scripts": {
+    "test": "playwright test",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "typescript": "~5.9"
+  },
+  "private": true
+}
