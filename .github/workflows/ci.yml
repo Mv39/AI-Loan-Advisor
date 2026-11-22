@@ -20,12 +20,15 @@ jobs:
           --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1})'"
           --health-interval 5s --health-timeout 5s --health-retries 10
     env:
-      MONGO_URI_TEST: mongodb://localhost:27017
+      # 127.0.0.1, not localhost: Node 18+ resolves localhost to IPv6 (::1) first, the service container listens on IPv4
+      MONGO_URI_TEST: mongodb://127.0.0.1:27017
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: 22, cache: npm, cache-dependency-path: server/package-lock.json }
       - run: npm ci
+      - name: Verify MongoDB is reachable
+        run: node -e "require('mongodb').MongoClient.connect(process.env.MONGO_URI_TEST,{serverSelectionTimeoutMS:10000}).then(async c=>{await c.db('admin').command({ping:1});console.log('MongoDB OK');await c.close()}).catch(e=>{console.error(e.message);process.exit(1)})"
       - run: npm run lint
       - run: npm run format:check
       - run: npm run typecheck
@@ -40,8 +43,8 @@ jobs:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: client } }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: 22, cache: npm, cache-dependency-path: client/package-lock.json }
       - run: npm ci
       - run: npx ng lint
@@ -54,8 +57,8 @@ jobs:
     needs: [server, client]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with: { node-version: 22 }
       - run: npm run setup && npm ci --prefix e2e
       - run: npm run build
@@ -72,5 +75,5 @@ jobs:
     needs: [server, client]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: docker build -t loan-advisor:ci .

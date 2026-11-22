@@ -20,13 +20,20 @@ interface Stores {
   chats: ChatRepository;
 }
 
-function contract(name: string, setup: () => Promise<Stores>, teardown: () => Promise<void> = async () => undefined) {
+function contract(
+  name: string,
+  setup: () => Promise<Stores>,
+  teardown: () => Promise<void> = async () => undefined,
+  init: () => Promise<void> = async () => undefined,
+) {
   describe(`Repository contract: ${name}`, () => {
     let s: Stores;
+    // Connect once (generous timeout for cold CI containers); fail the whole suite with one clear error if unreachable.
+    beforeAll(init, 30_000);
     beforeEach(async () => {
       s = await setup();
-    });
-    afterAll(teardown);
+    }, 15_000);
+    afterAll(teardown, 15_000);
 
     it('upserts and reads profiles per user', async () => {
       await s.profiles.upsert(ALICE, baseProfile({ requestedAmount: 111111 }));
@@ -100,8 +107,7 @@ if (mongoUri) {
   contract(
     'mongodb',
     async () => {
-      // One client for the suite; wipe collections between tests.
-      stores ??= await connectMongo(mongoUri, dbName, TTL);
+      if (!stores) throw new Error(`MongoDB not reachable at ${mongoUri} (use 127.0.0.1 rather than localhost)`);
       const db = stores.client.db(dbName);
       await Promise.all([db.collection('profiles').deleteMany({}), db.collection('chat_sessions').deleteMany({})]);
       return stores;
@@ -110,6 +116,9 @@ if (mongoUri) {
       if (!stores) return;
       await stores.client.db(dbName).dropDatabase();
       await stores.client.close();
+    },
+    async () => {
+      stores = await connectMongo(mongoUri, dbName, TTL);
     },
   );
 } else {
